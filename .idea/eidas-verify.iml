@@ -22,9 +22,12 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-timestamp/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-trust/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-trust/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/eidas-verify/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-verify/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-x509/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/eidas-x509/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/eidas-xades/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/eidas-xades/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

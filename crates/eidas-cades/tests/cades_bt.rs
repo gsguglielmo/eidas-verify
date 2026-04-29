@@ -423,7 +423,7 @@ fn cades_bt_invalid_timestamp_keeps_bb_with_warning() {
     // B-B still valid; timestamp rejected so level doesn't lift.
     assert_eq!(sr.status, Status::TotalPassed);
     assert_eq!(sr.level_reached, Level::BB);
-    let codes: Vec<_> = sr.diagnostics.iter().map(|d| d.code).collect();
+    let codes: Vec<_> = sr.diagnostics.iter().map(|d| d.code.as_str()).collect();
     assert!(
         codes.contains(&"SIGNATURE_TIMESTAMP_INVALID"),
         "expected SIGNATURE_TIMESTAMP_INVALID, got {codes:?}"

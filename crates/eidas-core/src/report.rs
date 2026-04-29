@@ -86,28 +86,32 @@ pub enum DiagnosticSeverity {
 ///
 /// `code` is stable and machine-readable (e.g. `CHAIN_EXPIRED`,
 /// `REVOCATION_REVOKED`); `message` is human-readable.
+///
+/// `code` is owned `String` rather than `&'static str` so the type can
+/// round-trip through serde without lifetime contortions. Callers
+/// typically pass string literals via `impl Into<String>`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DiagnosticMessage {
     pub severity: DiagnosticSeverity,
-    pub code: &'static str,
+    pub code: String,
     pub message: String,
 }
 
 impl DiagnosticMessage {
     #[must_use]
-    pub fn info(code: &'static str, msg: impl Into<String>) -> Self {
-        Self { severity: DiagnosticSeverity::Info, code, message: msg.into() }
+    pub fn info(code: impl Into<String>, msg: impl Into<String>) -> Self {
+        Self { severity: DiagnosticSeverity::Info, code: code.into(), message: msg.into() }
     }
 
     #[must_use]
-    pub fn warn(code: &'static str, msg: impl Into<String>) -> Self {
-        Self { severity: DiagnosticSeverity::Warning, code, message: msg.into() }
+    pub fn warn(code: impl Into<String>, msg: impl Into<String>) -> Self {
+        Self { severity: DiagnosticSeverity::Warning, code: code.into(), message: msg.into() }
     }
 
     #[must_use]
-    pub fn error(code: &'static str, msg: impl Into<String>) -> Self {
-        Self { severity: DiagnosticSeverity::Error, code, message: msg.into() }
+    pub fn error(code: impl Into<String>, msg: impl Into<String>) -> Self {
+        Self { severity: DiagnosticSeverity::Error, code: code.into(), message: msg.into() }
     }
 }
 
@@ -232,7 +236,7 @@ pub struct SignatureReport {
 impl SignatureReport {
     /// Report a fresh-failure with no checks passed.
     #[must_use]
-    pub fn failed(code: &'static str, msg: impl Into<String>) -> Self {
+    pub fn failed(code: impl Into<String>, msg: impl Into<String>) -> Self {
         Self {
             status: Status::TotalFailedSub,
             level_reached: Level::Unknown,

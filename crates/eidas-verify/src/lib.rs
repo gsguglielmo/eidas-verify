@@ -28,6 +28,8 @@ pub use eidas_asic as asic;
 pub use eidas_cades as cades;
 #[cfg(feature = "jades")]
 pub use eidas_jades as jades;
+#[cfg(feature = "xades")]
+pub use eidas_xades as xades;
 #[cfg(feature = "pades")]
 pub use eidas_pades as pades;
 #[cfg(feature = "trust-list")]
@@ -40,4 +42,4 @@ pub use eidas_timestamp as timestamp;
 pub use eidas_x509::{ChainBuilder, ChainValidationResult, TrustAnchor};
 
 pub mod verifier;
-pub use verifier::{Verifier, VerifierBuilder};
+pub use verifier::{ContainerHint, DetachedFormat, VerificationInput, Verifier, VerifierBuilder};

@@ -15,6 +15,7 @@ eidas-cms        = { workspace = true, optional = true }
 eidas-core       = { workspace = true }
 eidas-jades      = { workspace = true, optional = true }
 eidas-pades      = { workspace = true, optional = true }
+eidas-xades      = { workspace = true, optional = true }
 eidas-policy     = { workspace = true }
 eidas-revocation = { workspace = true }
 eidas-timestamp  = { workspace = true }
@@ -23,6 +24,10 @@ eidas-qualify    = { workspace = true, optional = true }
 eidas-x509       = { workspace = true }
 x509-cert        = { workspace = true }
 
+[dev-dependencies]
+base64    = { workspace = true }
+der       = { workspace = true }
+
 [features]
 default = ["cades", "pades", "asic", "jades", "trust-list", "ts-119-615", "cades-qualify"]
 cades = ["dep:eidas-cms", "dep:eidas-cades"]
@@ -30,6 +35,7 @@ cades-qualify = ["cades", "ts-119-615", "eidas-cades?/ts-119-615"]
 pades = ["cades", "dep:eidas-pades"]
 asic = ["cades", "dep:eidas-asic"]
 jades = ["dep:eidas-jades"]
+xades = ["dep:eidas-xades"]
 trust-list = ["dep:eidas-trust"]
 ts-119-615 = ["trust-list", "dep:eidas-qualify"]
 # Future features: "jades", "xades".

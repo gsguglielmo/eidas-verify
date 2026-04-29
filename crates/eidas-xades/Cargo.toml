@@ -1,0 +1,34 @@
+[package]
+name = "eidas-xades"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "XAdES (XML Advanced Electronic Signatures) verification for eidas-verify."
+
+[dependencies]
+base64     = { workspace = true }
+chrono     = { workspace = true }
+der        = { workspace = true }
+ecdsa      = { workspace = true }
+eidas-core = { workspace = true }
+eidas-x509 = { workspace = true }
+hex        = { workspace = true }
+p256       = { workspace = true }
+p384       = { workspace = true }
+quick-xml  = { workspace = true }
+rsa        = { workspace = true }
+sha2       = { workspace = true }
+signature  = { workspace = true }
+spki       = { workspace = true }
+x509-cert  = { workspace = true }
+
+[dev-dependencies]
+eidas-policy      = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+
+[lints]
+workspace = true

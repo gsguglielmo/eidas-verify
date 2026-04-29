@@ -265,7 +265,7 @@ fn cades_bb_detects_tampered_content() {
     let codes: Vec<_> = report.signatures[0]
         .diagnostics
         .iter()
-        .map(|d| d.code)
+        .map(|d| d.code.as_str())
         .collect();
     assert!(
         codes.contains(&"MESSAGE_DIGEST_MISMATCH"),

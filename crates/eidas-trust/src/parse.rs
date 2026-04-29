@@ -516,7 +516,7 @@ fn find_country(reader: &mut Reader<&[u8]>, closing: &str) -> Result<Option<Stri
     Ok(country)
 }
 
-fn skip_element(reader: &mut Reader<&[u8]>, closing: &str) -> Result<()> {
+fn skip_element(reader: &mut Reader<&[u8]>, _closing: &str) -> Result<()> {
     let mut depth = 1usize;
     let mut buf = Vec::new();
     while depth > 0 {
@@ -525,13 +525,8 @@ fn skip_element(reader: &mut Reader<&[u8]>, closing: &str) -> Result<()> {
             .map_err(|e| Error::Xml(format!("skip: {e}")))?
         {
             Event::Start(_) => depth += 1,
-            Event::End(ref e) => {
-                let ln = local(e.name());
-                if ln == closing {
-                    depth -= 1;
-                } else {
-                    depth -= 1;
-                }
+            Event::End(_) => {
+                depth -= 1;
             }
             Event::Eof => break,
             _ => {}

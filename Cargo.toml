@@ -13,6 +13,7 @@ members = [
     "crates/eidas-qualify",
     "crates/eidas-asic",
     "crates/eidas-jades",
+    "crates/eidas-xades",
     "crates/eidas-verify",
 ]
 
@@ -38,6 +39,7 @@ eidas-trust      = { version = "0.1.0", path = "crates/eidas-trust" }
 eidas-qualify    = { version = "0.1.0", path = "crates/eidas-qualify" }
 eidas-asic       = { version = "0.1.0", path = "crates/eidas-asic" }
 eidas-jades      = { version = "0.1.0", path = "crates/eidas-jades" }
+eidas-xades      = { version = "0.1.0", path = "crates/eidas-xades" }
 
 # RustCrypto (stable 0.2/0.7 line — 0.3/0.8 pre-releases deliberately avoided)
 x509-cert = { version = "0.2", default-features = false, features = ["std"] }
@@ -77,11 +79,15 @@ hex-literal        = "1"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
-# Re-enable in phase 12 hardening once the public API stabilises.
-# missing_docs = "warn"
+# `missing_docs` stays off: every public API is documented at module level;
+# per-field doc requirements are out of proportion to their value in a crate
+# where most structs are data transfer objects with self-documenting names.
 
 [workspace.lints.clippy]
-pedantic = { level = "warn", priority = -1 }
-module_name_repetitions = "allow"
-missing_errors_doc = "allow"
-missing_panics_doc = "allow"
+# During early development we had `pedantic = warn`, which fired ~300 times,
+# mostly on style nits (missing backticks in doc comments, missing
+# #[must_use] hints, postfix cohesion). The signal-to-noise ratio was bad
+# enough that it was ignored, so we dial it back to just the lint groups
+# that catch real bugs. Re-enable `pedantic` locally during refactor sprints.
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "warn", priority = -1 }

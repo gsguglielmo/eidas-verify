@@ -452,6 +452,8 @@ dependencies = [
 name = "eidas-verify"
 version = "0.1.0"
 dependencies = [
+ "base64",
+ "der",
  "eidas-asic",
  "eidas-cades",
  "eidas-cms",
@@ -464,6 +466,7 @@ dependencies = [
  "eidas-timestamp",
  "eidas-trust",
  "eidas-x509",
+ "eidas-xades",
  "x509-cert",
 ]
 
@@ -480,6 +483,30 @@ dependencies = [
  "rcgen",
  "spki",
  "time",
+ "x509-cert",
+]
+
+[[package]]
+name = "eidas-xades"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "chrono",
+ "der",
+ "ecdsa",
+ "eidas-core",
+ "eidas-policy",
+ "eidas-x509",
+ "hex",
+ "p256",
+ "p384",
+ "pretty_assertions",
+ "quick-xml",
+ "rsa",
+ "sha2",
+ "signature",
+ "spki",
+ "tempfile",
  "x509-cert",
 ]
 

@@ -156,6 +156,18 @@ impl Verifier {
                         self.time,
                     );
                 }
+                #[cfg(feature = "xades")]
+                VerificationInput::Container {
+                    bytes,
+                    hint: Some(ContainerHint::XadesEnveloped),
+                } => {
+                    return eidas_xades::verify_xades(
+                        &eidas_xades::XadesInput { xml: bytes },
+                        &self.chain_builder,
+                        &self.policy,
+                        self.time,
+                    );
+                }
                 VerificationInput::Container { bytes, hint: None } => {
                     return eidas_cades::verify_cades(
                         &eidas_cms::CadesInput {

@@ -337,7 +337,7 @@ fn jades_rejects_bad_x5t_header() {
     )
     .unwrap();
     assert_eq!(report.signatures[0].status, Status::TotalFailedSub);
-    let codes: Vec<_> = report.signatures[0].diagnostics.iter().map(|d| d.code).collect();
+    let codes: Vec<_> = report.signatures[0].diagnostics.iter().map(|d| d.code.as_str()).collect();
     assert!(
         codes.iter().any(|c| c.contains("JADES") || c.contains("VERIFICATION")),
         "diagnostics: {codes:?}"

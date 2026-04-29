@@ -85,9 +85,19 @@ fn build_pki() -> Pki {
         "-set_serial", "1",
     ]));
 
-    let leaf_plain = issue_leaf(p, &ca_pem, &ca_key, "plain", &[]);
-    let leaf_qc_sscd =
-        issue_leaf(p, &ca_pem, &ca_key, "qc-sscd", &[("QcCompliance", "0.4.0.1862.1.1"), ("QcSSCD", "0.4.0.1862.1.4")]);
+    // issue_leaf's return value is the DER of the leaf cert; we read the
+    // PEM file from disk below instead, so we bind with `_` prefixes.
+    let _ = issue_leaf(p, &ca_pem, &ca_key, "plain", &[]);
+    let _ = issue_leaf(
+        p,
+        &ca_pem,
+        &ca_key,
+        "qc-sscd",
+        &[
+            ("QcCompliance", "0.4.0.1862.1.1"),
+            ("QcSSCD", "0.4.0.1862.1.4"),
+        ],
+    );
     issue_leaf(p, &ca_pem, &ca_key, "qc-no-sscd", &[("QcCompliance", "0.4.0.1862.1.1")]);
 
     Pki {

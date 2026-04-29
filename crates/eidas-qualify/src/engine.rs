@@ -115,15 +115,16 @@ pub fn qualify_signer(input: &QualificationInput<'_>) -> QualificationOutput {
     let mut qualifiers = q_list_from_service(qualifiers_uri);
     qualifiers.extend(q_list_from_qc(&qc));
 
+    // QES conditions, in TS 119 615 priority order:
+    // - TSL explicitly declares QC-WithQSCD, OR
+    // - TSL says "status-as-in-cert" and cert asserts QcSSCD, OR
+    // - TSL is silent on QSCD and cert asserts QcSSCD (§5.5.4 "trust cert").
     let qualification = if has_no_qscd_qualifier {
         Qualification::AdESqc
-    } else if has_qscd_qualifier {
-        Qualification::QES
-    } else if has_status_as_in_cert && qc.qc_sscd {
-        Qualification::QES
-    } else if qc.qc_sscd && !has_status_as_in_cert {
-        // Cert asserts QSCD and the TSL is silent on QSCD status — trust
-        // the cert (ETSI TS 119 615 §5.5.4 "when no qualifier, trust cert").
+    } else if has_qscd_qualifier
+        || (has_status_as_in_cert && qc.qc_sscd)
+        || (!has_status_as_in_cert && qc.qc_sscd)
+    {
         Qualification::QES
     } else {
         Qualification::AdESqc
