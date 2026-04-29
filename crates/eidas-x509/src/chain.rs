@@ -51,7 +51,7 @@ pub struct ChainValidationResult {
 }
 
 /// Builder for X.509 chains.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ChainBuilder {
     anchors: Vec<TrustAnchor>,
     intermediates: Vec<Certificate>,

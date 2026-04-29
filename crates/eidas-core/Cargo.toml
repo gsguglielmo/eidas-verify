@@ -9,6 +9,7 @@ authors.workspace = true
 description = "Shared types for eidas-verify: ValidationTime, AlgorithmPolicy, VerificationReport, Error."
 
 [dependencies]
+base64     = { workspace = true, optional = true }
 chrono     = { workspace = true }
 const-oid  = { workspace = true }
 serde      = { workspace = true, optional = true }
@@ -17,7 +18,7 @@ x509-cert  = { workspace = true }
 
 [features]
 default = []
-serde = ["dep:serde", "chrono/serde"]
+serde = ["dep:serde", "dep:base64", "chrono/serde"]
 
 [lints]
 workspace = true

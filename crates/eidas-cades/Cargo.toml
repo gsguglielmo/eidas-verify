@@ -15,8 +15,10 @@ const-oid        = { workspace = true }
 der              = { workspace = true }
 eidas-cms        = { workspace = true }
 eidas-core       = { workspace = true }
+eidas-qualify    = { workspace = true, optional = true }
 eidas-revocation = { workspace = true }
 eidas-timestamp  = { workspace = true }
+eidas-trust      = { workspace = true, optional = true }
 eidas-x509       = { workspace = true }
 hex              = { workspace = true }
 rsa              = { workspace = true }
@@ -24,9 +26,15 @@ spki             = { workspace = true }
 x509-cert        = { workspace = true }
 x509-ocsp        = { version = "0.2", default-features = false, features = ["std"] }
 
+[features]
+default = []
+ts-119-615 = ["dep:eidas-qualify", "dep:eidas-trust"]
+
 [dev-dependencies]
 base64            = { workspace = true }
 eidas-policy      = { workspace = true }
+eidas-qualify     = { workspace = true }
+eidas-trust       = { workspace = true }
 hex-literal       = { workspace = true }
 pretty_assertions = { workspace = true }
 tempfile          = "3"

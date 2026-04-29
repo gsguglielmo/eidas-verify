@@ -1,0 +1,27 @@
+[package]
+name = "eidas-asic"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "ASiC (Associated Signature Container) verification for eidas-verify."
+
+[dependencies]
+eidas-cades = { workspace = true }
+eidas-cms   = { workspace = true }
+eidas-core  = { workspace = true }
+zip         = { version = "0.6", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+base64            = { workspace = true }
+der               = { workspace = true }
+eidas-policy      = { workspace = true }
+eidas-x509        = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+x509-cert         = { workspace = true }
+
+[lints]
+workspace = true

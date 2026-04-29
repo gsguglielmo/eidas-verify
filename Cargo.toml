@@ -10,6 +10,9 @@ members = [
     "crates/eidas-cades",
     "crates/eidas-pades",
     "crates/eidas-trust",
+    "crates/eidas-qualify",
+    "crates/eidas-asic",
+    "crates/eidas-jades",
     "crates/eidas-verify",
 ]
 
@@ -32,6 +35,9 @@ eidas-timestamp  = { version = "0.1.0", path = "crates/eidas-timestamp" }
 eidas-cades      = { version = "0.1.0", path = "crates/eidas-cades" }
 eidas-pades      = { version = "0.1.0", path = "crates/eidas-pades" }
 eidas-trust      = { version = "0.1.0", path = "crates/eidas-trust" }
+eidas-qualify    = { version = "0.1.0", path = "crates/eidas-qualify" }
+eidas-asic       = { version = "0.1.0", path = "crates/eidas-asic" }
+eidas-jades      = { version = "0.1.0", path = "crates/eidas-jades" }
 
 # RustCrypto (stable 0.2/0.7 line — 0.3/0.8 pre-releases deliberately avoided)
 x509-cert = { version = "0.2", default-features = false, features = ["std"] }

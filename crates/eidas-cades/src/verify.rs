@@ -15,14 +15,19 @@ use x509_cert::Certificate;
 
 use crate::unsigned::{self, UnsignedAttrs};
 
-/// Trust material: anchors + any intermediates the caller can provide.
+/// Trust material: anchors + intermediates + (optional) TrustedLists.
 ///
-/// The CAdES flow augments this with `ets-certValues` from the signature,
-/// so callers only need to pre-populate the anchor set.
+/// The CAdES flow augments anchors/intermediates with `ets-certValues` from
+/// the signature, so callers only need to pre-populate the anchor set.
+/// When `trusted_lists` is populated (requires the `ts-119-615` feature),
+/// the produced `SignatureReport.qualification` reflects ETSI TS 119 615
+/// instead of defaulting to `Qualification::AdES`.
 #[derive(Default, Debug, Clone)]
 pub struct CadesTrustMaterial {
     pub trust_anchors: Vec<Certificate>,
     pub intermediates: Vec<Certificate>,
+    #[cfg(feature = "ts-119-615")]
+    pub trusted_lists: Option<eidas_trust::TrustedLists>,
 }
 
 impl CadesTrustMaterial {
@@ -37,6 +42,13 @@ impl CadesTrustMaterial {
 
     pub fn with_intermediates<I: IntoIterator<Item = Certificate>>(mut self, certs: I) -> Self {
         self.intermediates.extend(certs);
+        self
+    }
+
+    /// Attach TrustedLists for ETSI TS 119 615 qualification.
+    #[cfg(feature = "ts-119-615")]
+    pub fn with_trusted_lists(mut self, tls: eidas_trust::TrustedLists) -> Self {
+        self.trusted_lists = Some(tls);
         self
     }
 
@@ -309,11 +321,15 @@ fn verify_one_signer_inner(
         }
     }
 
+    // --- ETSI TS 119 615 qualification (optional). ---
+    let (qualification, qualifiers) =
+        apply_qualification(signer_cert, &chain_result.chain, trust, reference_time, &mut diagnostics);
+
     Ok(SignatureReport {
         status: Status::TotalPassed,
         level_reached: level,
-        qualification: Qualification::AdES,
-        qualifiers: Vec::new(),
+        qualification,
+        qualifiers,
         signer: Some(cert_info(signer_cert)?),
         chain: chain_infos,
         signing_time_claimed: bb_core.signing_time_claimed,
@@ -323,6 +339,44 @@ fn verify_one_signer_inner(
         revocation,
         diagnostics,
     })
+}
+
+/// Call the qualification engine if TrustedLists were provided; otherwise
+/// return the default baseline.
+#[cfg(feature = "ts-119-615")]
+fn apply_qualification(
+    signer: &Certificate,
+    chain: &[Certificate],
+    trust: &CadesTrustMaterial,
+    at: chrono::DateTime<chrono::Utc>,
+    diagnostics: &mut Vec<DiagnosticMessage>,
+) -> (
+    Qualification,
+    Vec<eidas_core::QualificationQualifier>,
+) {
+    let Some(tls) = trust.trusted_lists.as_ref() else {
+        return (Qualification::AdES, Vec::new());
+    };
+    let out = eidas_qualify::qualify_signer(&eidas_qualify::QualificationInput {
+        signer,
+        chain,
+        trusted_lists: tls,
+        at,
+        baseline: Qualification::AdES,
+    });
+    diagnostics.extend(out.diagnostics);
+    (out.qualification, out.qualifiers)
+}
+
+#[cfg(not(feature = "ts-119-615"))]
+fn apply_qualification(
+    _signer: &Certificate,
+    _chain: &[Certificate],
+    _trust: &CadesTrustMaterial,
+    _at: chrono::DateTime<chrono::Utc>,
+    _diagnostics: &mut Vec<DiagnosticMessage>,
+) -> (Qualification, Vec<eidas_core::QualificationQualifier>) {
+    (Qualification::AdES, Vec::new())
 }
 
 // -----------------------------------------------------------------------------

@@ -120,6 +120,42 @@ impl Verifier {
                         self.time,
                     );
                 }
+                #[cfg(feature = "asic")]
+                VerificationInput::Container {
+                    bytes,
+                    hint: Some(ContainerHint::Asic),
+                } => {
+                    return eidas_asic::verify_asic(
+                        &eidas_asic::AsicInput { bytes },
+                        &trust,
+                        &self.policy,
+                        self.time,
+                    );
+                }
+                #[cfg(feature = "jades")]
+                VerificationInput::Container {
+                    bytes,
+                    hint: Some(ContainerHint::JadesCompact),
+                } => {
+                    return eidas_jades::verify_jades(
+                        &eidas_jades::JadesInput { bytes, is_json: false },
+                        &self.chain_builder,
+                        &self.policy,
+                        self.time,
+                    );
+                }
+                #[cfg(feature = "jades")]
+                VerificationInput::Container {
+                    bytes,
+                    hint: Some(ContainerHint::JadesJson),
+                } => {
+                    return eidas_jades::verify_jades(
+                        &eidas_jades::JadesInput { bytes, is_json: true },
+                        &self.chain_builder,
+                        &self.policy,
+                        self.time,
+                    );
+                }
                 VerificationInput::Container { bytes, hint: None } => {
                     return eidas_cades::verify_cades(
                         &eidas_cms::CadesInput {

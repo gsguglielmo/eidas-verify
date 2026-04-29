@@ -22,12 +22,18 @@ pub use eidas_core::{
     Result, RevocationInfo, RevocationStatus, SignatureAlgorithm, SignatureReport, Status,
     TimestampInfo, ValidationTime, VerificationReport,
 };
+#[cfg(feature = "asic")]
+pub use eidas_asic as asic;
 #[cfg(feature = "cades")]
 pub use eidas_cades as cades;
+#[cfg(feature = "jades")]
+pub use eidas_jades as jades;
 #[cfg(feature = "pades")]
 pub use eidas_pades as pades;
 #[cfg(feature = "trust-list")]
 pub use eidas_trust as trust;
+#[cfg(feature = "ts-119-615")]
+pub use eidas_qualify as qualify;
 pub use eidas_policy as policy;
 pub use eidas_revocation as revocation;
 pub use eidas_timestamp as timestamp;

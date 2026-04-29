@@ -9,23 +9,30 @@ authors.workspace = true
 description = "Pure-Rust verifier for EU electronic signatures (PAdES, CAdES, XAdES, JAdES, ASiC). Verification only."
 
 [dependencies]
+eidas-asic       = { workspace = true, optional = true }
 eidas-cades      = { workspace = true, optional = true }
 eidas-cms        = { workspace = true, optional = true }
 eidas-core       = { workspace = true }
+eidas-jades      = { workspace = true, optional = true }
 eidas-pades      = { workspace = true, optional = true }
 eidas-policy     = { workspace = true }
 eidas-revocation = { workspace = true }
 eidas-timestamp  = { workspace = true }
 eidas-trust      = { workspace = true, optional = true }
+eidas-qualify    = { workspace = true, optional = true }
 eidas-x509       = { workspace = true }
 x509-cert        = { workspace = true }
 
 [features]
-default = ["cades", "pades", "trust-list"]
+default = ["cades", "pades", "asic", "jades", "trust-list", "ts-119-615", "cades-qualify"]
 cades = ["dep:eidas-cms", "dep:eidas-cades"]
+cades-qualify = ["cades", "ts-119-615", "eidas-cades?/ts-119-615"]
 pades = ["cades", "dep:eidas-pades"]
+asic = ["cades", "dep:eidas-asic"]
+jades = ["dep:eidas-jades"]
 trust-list = ["dep:eidas-trust"]
-# Future features: "asic", "jades", "ts-119-615", "xades".
+ts-119-615 = ["trust-list", "dep:eidas-qualify"]
+# Future features: "jades", "xades".
 
 [lints]
 workspace = true
