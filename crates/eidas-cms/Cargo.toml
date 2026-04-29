@@ -1,0 +1,40 @@
+[package]
+name = "eidas-cms"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "CAdES / CMS SignedData verification for eidas-verify."
+
+[dependencies]
+chrono       = { workspace = true }
+cms          = { workspace = true }
+const-oid    = { workspace = true }
+der          = { workspace = true }
+ecdsa        = { workspace = true }
+eidas-core   = { workspace = true }
+eidas-x509   = { workspace = true }
+elliptic-curve = { version = "0.13", default-features = false }
+hex          = { workspace = true }
+p256         = { workspace = true }
+p384         = { workspace = true }
+p521         = { workspace = true }
+rsa          = { workspace = true }
+sha1         = { version = "0.10", default-features = false, features = ["std"] }
+sha2         = { workspace = true }
+signature    = { workspace = true }
+spki         = { workspace = true }
+x509-cert    = { workspace = true }
+
+[dev-dependencies]
+base64            = { workspace = true }
+eidas-policy      = { workspace = true }
+hex               = { workspace = true }
+hex-literal       = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+
+[lints]
+workspace = true

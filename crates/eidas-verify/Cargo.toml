@@ -1,0 +1,31 @@
+[package]
+name = "eidas-verify"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Pure-Rust verifier for EU electronic signatures (PAdES, CAdES, XAdES, JAdES, ASiC). Verification only."
+
+[dependencies]
+eidas-cades      = { workspace = true, optional = true }
+eidas-cms        = { workspace = true, optional = true }
+eidas-core       = { workspace = true }
+eidas-pades      = { workspace = true, optional = true }
+eidas-policy     = { workspace = true }
+eidas-revocation = { workspace = true }
+eidas-timestamp  = { workspace = true }
+eidas-trust      = { workspace = true, optional = true }
+eidas-x509       = { workspace = true }
+x509-cert        = { workspace = true }
+
+[features]
+default = ["cades", "pades", "trust-list"]
+cades = ["dep:eidas-cms", "dep:eidas-cades"]
+pades = ["cades", "dep:eidas-pades"]
+trust-list = ["dep:eidas-trust"]
+# Future features: "asic", "jades", "ts-119-615", "xades".
+
+[lints]
+workspace = true

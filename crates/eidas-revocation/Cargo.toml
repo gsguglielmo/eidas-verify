@@ -1,0 +1,33 @@
+[package]
+name = "eidas-revocation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Offline CRL + OCSP revocation checking for eidas-verify."
+
+[dependencies]
+chrono          = { workspace = true }
+const-oid       = { workspace = true }
+der             = { workspace = true }
+eidas-core      = { workspace = true }
+eidas-cms       = { workspace = true }
+eidas-x509      = { workspace = true }
+sha1            = { version = "0.10", default-features = false, features = ["std"] }
+sha2            = { workspace = true }
+signature       = { workspace = true }
+spki            = { workspace = true }
+x509-cert       = { workspace = true }
+x509-ocsp       = { version = "0.2", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+base64            = { workspace = true }
+eidas-policy      = { workspace = true }
+hex               = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+
+[lints]
+workspace = true

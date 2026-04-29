@@ -1,0 +1,35 @@
+[package]
+name = "eidas-cades"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "CAdES level handling (B-B, B-T, B-LT, B-LTA) for eidas-verify."
+
+[dependencies]
+chrono           = { workspace = true }
+cms              = { workspace = true }
+const-oid        = { workspace = true }
+der              = { workspace = true }
+eidas-cms        = { workspace = true }
+eidas-core       = { workspace = true }
+eidas-revocation = { workspace = true }
+eidas-timestamp  = { workspace = true }
+eidas-x509       = { workspace = true }
+hex              = { workspace = true }
+rsa              = { workspace = true }
+spki             = { workspace = true }
+x509-cert        = { workspace = true }
+x509-ocsp        = { version = "0.2", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+base64            = { workspace = true }
+eidas-policy      = { workspace = true }
+hex-literal       = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+
+[lints]
+workspace = true

@@ -1,0 +1,23 @@
+[package]
+name = "eidas-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Shared types for eidas-verify: ValidationTime, AlgorithmPolicy, VerificationReport, Error."
+
+[dependencies]
+chrono     = { workspace = true }
+const-oid  = { workspace = true }
+serde      = { workspace = true, optional = true }
+thiserror  = { workspace = true }
+x509-cert  = { workspace = true }
+
+[features]
+default = []
+serde = ["dep:serde", "chrono/serde"]
+
+[lints]
+workspace = true

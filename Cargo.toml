@@ -1,6 +1,81 @@
-[package]
-name = "eidas-verify"
+[workspace]
+resolver = "3"
+members = [
+    "crates/eidas-core",
+    "crates/eidas-policy",
+    "crates/eidas-x509",
+    "crates/eidas-cms",
+    "crates/eidas-revocation",
+    "crates/eidas-timestamp",
+    "crates/eidas-cades",
+    "crates/eidas-pades",
+    "crates/eidas-trust",
+    "crates/eidas-verify",
+]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gsguglielmo/eidas-verify"
+authors = ["eidas-verify contributors"]
 
-[dependencies]
+[workspace.dependencies]
+# Intra-workspace
+eidas-core    = { version = "0.1.0", path = "crates/eidas-core" }
+eidas-policy  = { version = "0.1.0", path = "crates/eidas-policy" }
+eidas-x509    = { version = "0.1.0", path = "crates/eidas-x509" }
+eidas-cms        = { version = "0.1.0", path = "crates/eidas-cms" }
+eidas-revocation = { version = "0.1.0", path = "crates/eidas-revocation" }
+eidas-timestamp  = { version = "0.1.0", path = "crates/eidas-timestamp" }
+eidas-cades      = { version = "0.1.0", path = "crates/eidas-cades" }
+eidas-pades      = { version = "0.1.0", path = "crates/eidas-pades" }
+eidas-trust      = { version = "0.1.0", path = "crates/eidas-trust" }
+
+# RustCrypto (stable 0.2/0.7 line — 0.3/0.8 pre-releases deliberately avoided)
+x509-cert = { version = "0.2", default-features = false, features = ["std"] }
+cms       = { version = "0.2", default-features = false, features = ["std"] }
+der       = { version = "0.7", default-features = false, features = ["std", "oid"] }
+spki      = { version = "0.7", default-features = false, features = ["std"] }
+const-oid = { version = "0.9", features = ["db"] }
+signature = { version = "2.2", default-features = false, features = ["std"] }
+
+# Signature verification backends
+rsa            = { version = "0.9", default-features = false, features = ["std", "sha2"] }
+ecdsa          = { version = "0.16", default-features = false, features = ["std", "verifying", "pkcs8", "der"] }
+p256           = { version = "0.13", default-features = false, features = ["std", "ecdsa", "pkcs8"] }
+p384           = { version = "0.13", default-features = false, features = ["std", "ecdsa", "pkcs8"] }
+p521           = { version = "0.13", default-features = false, features = ["std", "ecdsa", "pkcs8"] }
+ed25519-dalek  = { version = "2.1", default-features = false, features = ["std"] }
+
+# Hashes
+sha2 = { version = "0.10", default-features = false, features = ["std"] }
+sha3 = { version = "0.10", default-features = false, features = ["std"] }
+
+# Time + encoding + errors
+chrono    = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+base64    = "0.22"
+hex       = "0.4"
+serde     = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+quick-xml = "0.31"
+
+# Dev-only
+insta              = { version = "1.40", features = ["yaml"] }
+rstest             = "0.21"
+proptest           = "1"
+pretty_assertions  = "1.4"
+hex-literal        = "1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+# Re-enable in phase 12 hardening once the public API stabilises.
+# missing_docs = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"

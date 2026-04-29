@@ -1,0 +1,25 @@
+[package]
+name = "eidas-trust"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "ETSI TS 119 612 TrustedList parsing for eidas-verify."
+
+[dependencies]
+base64      = { workspace = true }
+chrono      = { workspace = true }
+der         = { workspace = true }
+eidas-core  = { workspace = true }
+eidas-x509  = { workspace = true }
+quick-xml   = { workspace = true }
+x509-cert   = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+
+[lints]
+workspace = true

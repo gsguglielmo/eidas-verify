@@ -1,0 +1,26 @@
+[package]
+name = "eidas-x509"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Certificate chain building and validation for eidas-verify."
+
+[dependencies]
+chrono     = { workspace = true }
+const-oid  = { workspace = true }
+der        = { workspace = true }
+eidas-core = { workspace = true }
+spki       = { workspace = true }
+x509-cert  = { workspace = true }
+
+[dev-dependencies]
+hex-literal       = { workspace = true }
+pretty_assertions = { workspace = true }
+rcgen             = { version = "0.13", default-features = false, features = ["pem", "ring"] }
+time              = { version = "0.3", default-features = false, features = ["std"] }
+
+[lints]
+workspace = true

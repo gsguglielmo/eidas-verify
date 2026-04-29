@@ -1,0 +1,27 @@
+[package]
+name = "eidas-pades"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "PAdES (PDF Advanced Electronic Signatures) verification for eidas-verify."
+
+[dependencies]
+eidas-cades      = { workspace = true }
+eidas-cms        = { workspace = true }
+eidas-core       = { workspace = true }
+hex              = { workspace = true }
+
+[dev-dependencies]
+base64            = { workspace = true }
+der               = { workspace = true }
+eidas-policy      = { workspace = true }
+eidas-x509        = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile          = "3"
+x509-cert         = { workspace = true }
+
+[lints]
+workspace = true
