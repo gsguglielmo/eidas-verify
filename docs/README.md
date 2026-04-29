@@ -27,6 +27,10 @@ pieces fit together.
    algorithm policy / revocation fetcher.
 8. [**Security model**](08-security-model.md) — trust boundaries, offline
    guarantees, what the library does *not* check, known soft spots.
+9. [**Deferred work**](09-deferred-work.md) — what the hardening pass
+   did not deliver, why, and what the next sprint should build
+   (fuzzing, MIRI, DSS corpus, archive-timestamp imprint, full XMLDSig,
+   algorithm expansion).
 
 ## Diagram conventions
 
