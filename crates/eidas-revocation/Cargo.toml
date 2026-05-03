@@ -25,9 +25,12 @@ x509-ocsp       = { version = "0.2", default-features = false, features = ["std"
 [dev-dependencies]
 base64            = { workspace = true }
 eidas-policy      = { workspace = true }
+eidas-test-corpus = { workspace = true }
 hex               = { workspace = true }
 pretty_assertions = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
+x509-ocsp         = { version = "0.2", default-features = false, features = ["std"] }
 
 [lints]
 workspace = true

@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      enable_online_tests:
+        description: "Run the online DSS-oracle / live-LOTL tier"
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  # The corpus checkout pulls ~270 MB; cache it across runs.
+  CORPUS_CACHE_KEY: dss-corpus-v1
+
+jobs:
+  build-and-test-offline:
+    name: cargo test (offline tier)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Cache DSS + PKITS corpus
+        id: corpus-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            tests/vectors/dss-corpus
+            tests/vectors/pkits
+          key: ${{ env.CORPUS_CACHE_KEY }}-${{ hashFiles('tests/vectors/dss-corpus.commit', 'tests/vectors/dss-corpus.sparse') }}
+
+      - name: Bootstrap corpora
+        if: steps.corpus-cache.outputs.cache-hit != 'true'
+        run: ./tools/sync-corpus.sh
+
+      - name: Workspace build
+        run: cargo build --workspace --all-targets
+
+      - name: Workspace test
+        run: cargo test --workspace --all-features
+
+      - name: clippy (deny warnings)
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: rustfmt check
+        run: cargo fmt --all -- --check
+
+      - name: cargo deny — production licenses
+        # Enforces that no LGPL/GPL crate ever enters the production graph.
+        # The DSS corpus (LGPL-2.1) lives under tests/vectors/ and is not in
+        # the dep tree, so this stays clean.
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check licenses
+        continue-on-error: true   # until deny.toml is committed; flip to false then.
+
+  fuzz-smoke:
+    name: cargo-fuzz smoke (60s/target)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-and-test-offline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --locked
+      - name: Discover fuzz targets
+        id: discover
+        run: |
+          if [[ -d fuzz/fuzz_targets ]]; then
+            ls fuzz/fuzz_targets/*.rs 2>/dev/null | xargs -n1 basename | sed 's/\.rs$//' | tr '\n' ' '
+          else
+            echo "(no fuzz targets yet)"
+          fi
+      - name: Run each target for 60s
+        if: steps.discover.outputs.targets != ''
+        run: |
+          for t in $(ls fuzz/fuzz_targets/*.rs 2>/dev/null | xargs -n1 basename | sed 's/\.rs$//'); do
+            echo "=== fuzzing $t ==="
+            cargo fuzz run "$t" -- -max_total_time=60 || exit 1
+          done
+
+  online-oracle:
+    name: cargo test (online tier — DSS demo + live LOTL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build-and-test-offline
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_online_tests == 'true' }}
+    continue-on-error: true   # EU service flakes shouldn't block PRs.
+    env:
+      EIDAS_VERIFY_ONLINE_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            tests/vectors/dss-corpus
+            tests/vectors/pkits
+          key: ${{ env.CORPUS_CACHE_KEY }}-${{ hashFiles('tests/vectors/dss-corpus.commit', 'tests/vectors/dss-corpus.sparse') }}
+      - name: Bootstrap corpora (cached)
+        run: ./tools/sync-corpus.sh
+      - name: Run online tier
+        run: cargo test --workspace --features online-tests -- --include-ignored online_

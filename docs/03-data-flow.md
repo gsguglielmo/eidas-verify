@@ -10,7 +10,7 @@ Every call enters at the facade and is routed by
 
 ```mermaid
 flowchart TB
-    start([verify(input)]) --> match{match input}
+    start(["verify(input)"]) --> match{match input}
 
     match -- "Detached { Cades }" --> cades[eidas_cades::verify_cades]
     match -- "Container { None }" --> cades
@@ -124,7 +124,7 @@ sequenceDiagram
     C->>PadesVerify: PadesInput { pdf }
     PadesVerify->>Scan: find_signatures(pdf)
     Scan->>Scan: locate all /ByteRange<br/>+ adjacent /Contents
-    Scan-->>PadesVerify: Vec<PdfSignatureLocation>
+    Scan-->>PadesVerify: Vec#lt;PdfSignatureLocation#gt;
 
     loop for each signature location
         Note over PadesVerify: check /SubFilter is supported
@@ -272,7 +272,7 @@ sequenceDiagram
     end
 
     Note over XadesVerify: Step 2 — SignedInfo signature
-    XadesVerify->>C14n: exc_c14n(<SignedInfo> subtree)
+    XadesVerify->>C14n: exc_c14n(#lt;SignedInfo#gt; subtree)
     C14n-->>XadesVerify: canonicalised SignedInfo
     XadesVerify->>XadesVerify: RSA/ECDSA verify<br/>(ECDSA is raw r||s, same as JWS)
 
@@ -301,7 +301,7 @@ flowchart LR
     style cms fill:#fff
 
     subgraph cms [eidas_cms::signature_verify]
-      vv[verify_cms_signature<br/>&#40;cert, sig_alg, digest_hint, data, sig&#41;]:::shared
+      vv[verify_cms_signature<br/>(cert, sig_alg, digest_hint, data, sig)]:::shared
       resolve[resolve_sig_alg]
       rsa[rsa_pkcs1v15_verify]
       p256[ecdsa_p256_verify]
@@ -313,9 +313,9 @@ flowchart LR
     end
 
     jades_rsa[eidas_jades::verify::rsa_verify] --> rsa
-    jades_p256[eidas_jades::verify::ecdsa_verify_p256] -.->|JWS raw r&#124;&#124;s| p256
+    jades_p256[eidas_jades::verify::ecdsa_verify_p256] -.->|JWS raw r#124;#124;s| p256
     xades_rsa[eidas_xades::verify::rsa_verify] --> rsa
-    xades_p256[eidas_xades::verify::ecdsa_p256_verify] -.->|XMLDSig raw r&#124;&#124;s| p256
+    xades_p256[eidas_xades::verify::ecdsa_p256_verify] -.->|XMLDSig raw r#124;#124;s| p256
 ```
 
 CAdES signatures come in as DER-encoded ECDSA (`p256::ecdsa::Signature::from_der`).

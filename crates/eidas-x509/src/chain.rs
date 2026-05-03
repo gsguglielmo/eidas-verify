@@ -267,13 +267,15 @@ fn validate_issuer_ca_capability(
         }
     }
     if !saw_bc {
-        diagnostics.push(DiagnosticMessage::warn(
-            "CA_NO_BASIC_CONSTRAINTS",
-            format!(
-                "issuer '{}' has no basicConstraints extension — assuming CA",
-                subject_display(issuer)
-            ),
-        ));
+        // RFC 5280 §6.1.4(k) is unambiguous: when validating an intermediate,
+        // basicConstraints MUST be present with cA = TRUE. PKITS §4.6.1
+        // (`InvalidMissingbasicConstraintsTest1`) is the canonical test for
+        // this. We previously emitted a warning and continued, which let
+        // misissued certificates slip through path validation.
+        return Err(Error::Chain(format!(
+            "issuer '{}' has no basicConstraints extension (RFC 5280 §6.1.4(k))",
+            subject_display(issuer)
+        )));
     }
     if !saw_ku {
         diagnostics.push(DiagnosticMessage::warn(

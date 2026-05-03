@@ -148,7 +148,7 @@ stateDiagram-v2
     Now: ValidationTime::Now
     Now: resolve() = system clock
 
-    At: ValidationTime::At(DateTime<Utc>)
+    At: ValidationTime::At(DateTime#lt;Utc#gt;)
     At: resolve() = caller-supplied instant
 
     BestSignatureTime: ValidationTime::BestSignatureTime
@@ -179,9 +179,9 @@ flowchart TB
     sf -- no --> fb
     fb --> md5{MD5?}
     md5 -- yes --> rej
-    md5 -- no --> sha1{SHA-1 &<br/>&#172;allow_sha1?}
+    md5 -- no --> sha1{SHA-1 AND<br/>NOT allow_sha1?}
     sha1 -- yes --> rej
-    sha1 -- no --> size{hash &lt; min<br/>&#124;&#124; key &lt; min<br/>&#124;&#124; DSA?}
+    sha1 -- no --> size{hash #lt; min<br/>OR key #lt; min<br/>OR DSA?}
     size -- yes --> rej
     size -- no --> acc
 ```

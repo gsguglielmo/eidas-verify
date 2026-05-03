@@ -1,0 +1,35 @@
+---
+source: crates/eidas-verify/tests/end_to_end_corpus.rs
+expression: projected_or_err(r)
+---
+ok:
+  container_kind: Pdf
+  signatures:
+    - diagnostic_codes:
+        - CADES_VERIFICATION_ERROR
+        - PADES_SIGNATURE_FOUND
+      level: Unknown
+      qualification: NotAdES
+      signer_present: false
+      status: TotalFailedSub
+    - diagnostic_codes:
+        - CADES_VERIFICATION_ERROR
+        - PADES_SIGNATURE_FOUND
+      level: Unknown
+      qualification: NotAdES
+      signer_present: false
+      status: TotalFailedSub
+    - diagnostic_codes:
+        - CADES_VERIFICATION_ERROR
+        - PADES_SIGNATURE_FOUND
+      level: Unknown
+      qualification: NotAdES
+      signer_present: false
+      status: TotalFailedSub
+    - diagnostic_codes:
+        - CADES_VERIFICATION_ERROR
+        - PADES_SIGNATURE_FOUND
+      level: Unknown
+      qualification: NotAdES
+      signer_present: false
+      status: TotalFailedSub

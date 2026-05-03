@@ -15,6 +15,7 @@ members = [
     "crates/eidas-jades",
     "crates/eidas-xades",
     "crates/eidas-verify",
+    "crates/eidas-test-corpus",
 ]
 
 [workspace.package]
@@ -40,6 +41,7 @@ eidas-qualify    = { version = "0.1.0", path = "crates/eidas-qualify" }
 eidas-asic       = { version = "0.1.0", path = "crates/eidas-asic" }
 eidas-jades      = { version = "0.1.0", path = "crates/eidas-jades" }
 eidas-xades      = { version = "0.1.0", path = "crates/eidas-xades" }
+eidas-test-corpus = { version = "0.1.0", path = "crates/eidas-test-corpus" }
 
 # RustCrypto (stable 0.2/0.7 line — 0.3/0.8 pre-releases deliberately avoided)
 x509-cert = { version = "0.2", default-features = false, features = ["std"] }
@@ -76,6 +78,11 @@ rstest             = "0.21"
 proptest           = "1"
 pretty_assertions  = "1.4"
 hex-literal        = "1"
+toml               = "0.8"
+# Wycheproof signature/digest test vectors. The crate bundles the JSON
+# (Apache-2.0) and exposes typed accessors so we don't re-deserialize by
+# hand. 0.6 is the latest published as of this writing.
+wycheproof         = "0.6"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

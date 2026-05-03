@@ -34,9 +34,11 @@ ts-119-615 = ["dep:eidas-qualify", "dep:eidas-trust"]
 base64            = { workspace = true }
 eidas-policy      = { workspace = true }
 eidas-qualify     = { workspace = true }
+eidas-test-corpus = { workspace = true }
 eidas-trust       = { workspace = true }
 hex-literal       = { workspace = true }
 pretty_assertions = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
 
 [lints]

@@ -1,0 +1,12 @@
+dss-cades/src/test/resources
+dss-pades/src/test/resources
+dss-xades/src/test/resources
+dss-jades/src/test/resources
+dss-asic-cades/src/test/resources
+dss-asic-xades/src/test/resources
+dss-tsl-validation/src/test/resources
+dss-validation/src/test/resources
+dss-spi/src/test/resources
+dss-document/src/test/resources
+LICENSE
+NOTICE

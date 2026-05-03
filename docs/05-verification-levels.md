@@ -149,7 +149,7 @@ flowchart TB
     more -- yes --> walk
     more -- no --> allgood{any Revoked?}
     allgood -- yes --> rev
-    allgood -- no --> hasbt{Level >= BT?}
+    allgood -- no --> hasbt{Level #gt;= BT?}
     hasbt -- yes --> lift[Level::BLT]
     hasbt -- no --> info[LT_MATERIAL_WITHOUT_TIMESTAMP]
 ```

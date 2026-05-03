@@ -19,7 +19,9 @@ x509-cert  = { workspace = true }
 
 [dev-dependencies]
 base64            = { workspace = true }
+eidas-test-corpus = { workspace = true }
 pretty_assertions = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
 
 [lints]

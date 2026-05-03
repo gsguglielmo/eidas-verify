@@ -17,9 +17,11 @@ spki       = { workspace = true }
 x509-cert  = { workspace = true }
 
 [dev-dependencies]
+eidas-test-corpus = { workspace = true }
 hex-literal       = { workspace = true }
 pretty_assertions = { workspace = true }
 rcgen             = { version = "0.13", default-features = false, features = ["pem", "ring"] }
+rstest            = { workspace = true }
 time              = { version = "0.3", default-features = false, features = ["std"] }
 
 [lints]

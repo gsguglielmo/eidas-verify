@@ -75,11 +75,20 @@ impl JwsSignature {
     }
 
     /// Parse from JSON flattened serialisation (RFC 7515 §7.2.2).
+    ///
+    /// `payload` is OPTIONAL per RFC 7797 / RFC 7515 §3.2 (detached JWS:
+    /// the JWS Payload is omitted from the JSON Serialization but the
+    /// signing input still includes its base64url form, supplied
+    /// out-of-band by the caller). When `payload` is absent the parsed
+    /// signature surfaces `payload = vec![]` and `payload_b64 = ""`;
+    /// callers in detached mode must reconstruct the signing input
+    /// using the matched original bytes.
     pub fn from_flattened_json(json: &[u8]) -> Result<Self> {
         #[derive(Deserialize)]
         struct Flat {
             protected: Option<String>,
-            payload: String,
+            #[serde(default)]
+            payload: Option<String>,
             signature: String,
         }
         let f: Flat = serde_json::from_slice(json)
@@ -95,13 +104,19 @@ impl JwsSignature {
             .map_err(|e| Error::Json(format!("JWS header b64url: {e}")))?;
         let header: JwsHeader = serde_json::from_slice(&header_bytes)
             .map_err(|e| Error::Json(format!("JWS header json: {e}")))?;
-        let payload = URL_SAFE_NO_PAD
-            .decode(&f.payload)
-            .map_err(|e| Error::Json(format!("JWS payload b64url: {e}")))?;
+        let (payload_b64, payload) = match f.payload {
+            Some(p) => {
+                let bytes = URL_SAFE_NO_PAD
+                    .decode(&p)
+                    .map_err(|e| Error::Json(format!("JWS payload b64url: {e}")))?;
+                (p, bytes)
+            }
+            None => (String::new(), Vec::new()),
+        };
         Ok(Self {
             header,
             protected_b64,
-            payload_b64: f.payload,
+            payload_b64,
             payload,
             signature,
         })

@@ -1,10 +1,10 @@
 //! `TSTInfo` parsing and TimeStampToken verification.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use cms::content_info::ContentInfo;
 use cms::signed_data::SignedData;
 use const_oid::ObjectIdentifier;
-use der::asn1::{GeneralizedTime, Int, OctetString};
+use der::asn1::{Int, OctetString};
 use der::{Decode, Encode, Sequence};
 use eidas_core::{
     AlgorithmId, DiagnosticMessage, Error, HashAlgorithm, Result, SignatureAlgorithm,
@@ -41,10 +41,17 @@ struct Accuracy {
 /// We deliberately drop `tsa` and `extensions` — verification does not need
 /// them, and their encoding (GeneralName CHOICE, IMPLICIT Extensions) is
 /// finicky enough that parsing them adds risk without value.
+///
+/// `policy` is stored as a dotted-decimal `String` rather than a typed
+/// `ObjectIdentifier` because real-world TSAs in the wild emit policies
+/// with >12 arcs and >39 bytes of body, exceeding `const_oid 0.9`'s default
+/// `ObjectIdentifier` buffer. The string form preserves the value
+/// losslessly while accommodating any length the spec allows. Verification
+/// does not consult the policy field; it is informational.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TstInfo {
     pub version: u32,
-    pub policy: ObjectIdentifier,
+    pub policy: String,
     pub message_imprint: ParsedMessageImprint,
     pub serial_number: Vec<u8>,
     pub gen_time: DateTime<Utc>,
@@ -60,6 +67,14 @@ pub struct ParsedMessageImprint {
 
 impl TstInfo {
     /// Parse a `TSTInfo` from DER bytes.
+    ///
+    /// Tolerant where the spec is strict but real-world TSAs deviate:
+    /// - `policy` is decoded directly from raw OID bytes, sidestepping
+    ///   the 39-byte buffer in `const_oid 0.9`. Real corpus examples
+    ///   (e.g. `tst-two-refs.tst`) carry >50-byte policy OIDs.
+    /// - `genTime` accepts `YYYYMMDDHHMMSS[.fff[fff]]Z`. Strict DER
+    ///   forbids fractional seconds, but Disig and other production TSAs
+    ///   emit them.
     pub fn from_der(bytes: &[u8]) -> Result<Self> {
         use der::{Reader, SliceReader};
 
@@ -75,9 +90,20 @@ impl TstInfo {
 
         // version INTEGER
         let version = u32::decode(&mut r).map_err(|e| Error::Asn1(format!("TSTInfo.version: {e}")))?;
-        // policy OBJECT IDENTIFIER
-        let policy = ObjectIdentifier::decode(&mut r)
-            .map_err(|e| Error::Asn1(format!("TSTInfo.policy: {e}")))?;
+        // policy OBJECT IDENTIFIER — decoded as raw bytes, then converted
+        // to dotted-decimal. Bypasses const_oid's fixed-size buffer.
+        let policy_hdr =
+            der::Header::decode(&mut r).map_err(|e| Error::Asn1(format!("TSTInfo.policy: {e}")))?;
+        if policy_hdr.tag != der::Tag::ObjectIdentifier {
+            return Err(Error::Asn1(format!(
+                "TSTInfo.policy: expected OID tag, got {:?}",
+                policy_hdr.tag
+            )));
+        }
+        let policy_bytes = r
+            .read_slice(policy_hdr.length)
+            .map_err(|e| Error::Asn1(format!("TSTInfo.policy body: {e}")))?;
+        let policy = decode_oid_to_dotted(policy_bytes)?;
         // messageImprint SEQUENCE
         let mi = MessageImprint::decode(&mut r)
             .map_err(|e| Error::Asn1(format!("TSTInfo.messageImprint: {e}")))?;
@@ -90,10 +116,19 @@ impl TstInfo {
         let serial = Int::decode(&mut r)
             .map_err(|e| Error::Asn1(format!("TSTInfo.serialNumber: {e}")))?;
         let serial_number = serial.as_bytes().to_vec();
-        // genTime GeneralizedTime
-        let gen_time_gt = GeneralizedTime::decode(&mut r)
-            .map_err(|e| Error::Asn1(format!("TSTInfo.genTime: {e}")))?;
-        let gen_time: DateTime<Utc> = gen_time_gt.to_date_time().to_system_time().into();
+        // genTime GeneralizedTime — tolerant of fractional seconds.
+        let gt_hdr =
+            der::Header::decode(&mut r).map_err(|e| Error::Asn1(format!("TSTInfo.genTime: {e}")))?;
+        if gt_hdr.tag != der::Tag::GeneralizedTime {
+            return Err(Error::Asn1(format!(
+                "TSTInfo.genTime: expected GeneralizedTime tag, got {:?}",
+                gt_hdr.tag
+            )));
+        }
+        let gt_bytes = r
+            .read_slice(gt_hdr.length)
+            .map_err(|e| Error::Asn1(format!("TSTInfo.genTime body: {e}")))?;
+        let gen_time = decode_generalized_time(gt_bytes)?;
 
         // The remaining fields (accuracy, ordering, nonce, tsa, extensions)
         // are all optional. We walk through them, skipping whatever is
@@ -126,6 +161,93 @@ impl TstInfo {
             nonce,
         })
     }
+}
+
+/// Decode raw DER OID body bytes (i.e. the bytes after the tag+length
+/// prefix) into a dotted-decimal string. Implements the base-128
+/// continuation-bit scheme of X.690 §8.19.
+fn decode_oid_to_dotted(body: &[u8]) -> Result<String> {
+    if body.is_empty() {
+        return Err(Error::Asn1("empty OID body".into()));
+    }
+    let first = body[0];
+    let arc1 = u64::from(first / 40);
+    let arc2 = u64::from(first % 40);
+    let mut out = format!("{arc1}.{arc2}");
+    let mut i = 1;
+    while i < body.len() {
+        let mut value: u64 = 0;
+        loop {
+            if i >= body.len() {
+                return Err(Error::Asn1("OID arc truncated mid-stream".into()));
+            }
+            let b = body[i];
+            i += 1;
+            value = value
+                .checked_shl(7)
+                .and_then(|v| v.checked_add(u64::from(b & 0x7f)))
+                .ok_or_else(|| Error::Asn1("OID arc overflow".into()))?;
+            if b & 0x80 == 0 {
+                break;
+            }
+        }
+        out.push('.');
+        out.push_str(&value.to_string());
+    }
+    Ok(out)
+}
+
+/// Tolerant GeneralizedTime parser: accepts the strict DER form
+/// (`YYYYMMDDHHMMSSZ`) and the real-world TSA form with fractional
+/// seconds (`YYYYMMDDHHMMSS.fffZ`, up to nanoseconds).
+fn decode_generalized_time(body: &[u8]) -> Result<DateTime<Utc>> {
+    let s = std::str::from_utf8(body)
+        .map_err(|_| Error::Asn1("genTime is not ASCII".into()))?;
+    // Must end in 'Z' (we don't accept local-time forms — irrelevant
+    // for TSAs, all of which are spec-required to use UTC).
+    let trimmed = s.strip_suffix('Z').ok_or_else(|| {
+        Error::Asn1(format!("genTime does not end in 'Z': {s:?}"))
+    })?;
+
+    let (date_part, frac_part) = match trimmed.split_once('.') {
+        Some((a, b)) => (a, Some(b)),
+        None => (trimmed, None),
+    };
+
+    if date_part.len() != 14 {
+        return Err(Error::Asn1(format!(
+            "genTime date portion is {} chars, expected 14: {s:?}",
+            date_part.len()
+        )));
+    }
+
+    let naive = NaiveDateTime::parse_from_str(date_part, "%Y%m%d%H%M%S")
+        .map_err(|e| Error::Asn1(format!("genTime parse: {e} on {s:?}")))?;
+
+    let dt: DateTime<Utc> = naive.and_utc();
+    let dt = match frac_part {
+        None => dt,
+        Some(frac) => {
+            // Pad/truncate to exactly 9 digits (nanoseconds), then add.
+            let frac_clean: String = frac.chars().filter(|c| c.is_ascii_digit()).collect();
+            if frac_clean.is_empty() {
+                dt
+            } else {
+                let mut padded = frac_clean.clone();
+                while padded.len() < 9 {
+                    padded.push('0');
+                }
+                if padded.len() > 9 {
+                    padded.truncate(9);
+                }
+                let nanos: u32 = padded
+                    .parse()
+                    .map_err(|e| Error::Asn1(format!("genTime fraction parse: {e}")))?;
+                dt + chrono::Duration::nanoseconds(i64::from(nanos))
+            }
+        }
+    };
+    Ok(dt)
 }
 
 /// What the token is timestamping (for `TimestampInfo.kind` in reports).

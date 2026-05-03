@@ -1,1 +1,8 @@
 /target
+
+# Test corpora — fetched on demand by tools/sync-corpus.sh, never committed.
+# The DSS corpus is LGPL-2.1; PKITS is US Federal public domain. Both live
+# upstream and stay out of this MIT-OR-Apache-2.0 tree by policy. See
+# tests/vectors/README.md and LICENSES.md for the full rationale.
+/tests/vectors/dss-corpus/
+/tests/vectors/pkits/

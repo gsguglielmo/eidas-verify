@@ -13,13 +13,20 @@ eidas-cades      = { workspace = true }
 eidas-cms        = { workspace = true }
 eidas-core       = { workspace = true }
 hex              = { workspace = true }
+# SIMD substring search for the PAdES scanner. Already in the dep graph
+# transitively via quick-xml; declaring it directly so the scanner has
+# linear-time scanning instead of the previous O(N*M) windows() loop.
+memchr           = "2"
 
 [dev-dependencies]
 base64            = { workspace = true }
 der               = { workspace = true }
 eidas-policy      = { workspace = true }
+eidas-test-corpus = { workspace = true }
 eidas-x509        = { workspace = true }
 pretty_assertions = { workspace = true }
+proptest          = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
 x509-cert         = { workspace = true }
 

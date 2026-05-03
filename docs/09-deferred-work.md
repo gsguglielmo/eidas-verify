@@ -665,3 +665,47 @@ Every gap is announced:
 
 A deployment that reads the reports can be as strict as it needs to be.
 A deployment that ignores diagnostics is using any verifier wrong.
+
+---
+
+## Test cross-reference
+
+The deep test suite added under `tests/vectors/` and per-crate
+`crates/*/tests/dss_corpus_*.rs` already encodes every deferred item as
+either a passing structural test or an `#[ignore]`-marked placeholder.
+When a deferred section is implemented, removing the corresponding
+`#[ignore]` attribute(s) is the verification step.
+
+| Deferred § | Status | Tests that unlock |
+|---|---|---|
+| §1 Fuzzing | scaffolding only | CI job `fuzz-smoke` in `.github/workflows/ci.yml` runs every fuzz target listed in `fuzz/fuzz_targets/`; today none exist. Adding a target there makes CI exercise it for 60 s automatically. |
+| §2 MIRI | scaffolding only | The MIRI workflow sketch in §2 above is canonical. Add it as `.github/workflows/miri.yml` when ready. |
+| §3 DSS test vectors | **partial — done in this round** | `tools/sync-corpus.sh` bootstraps the corpus into `tests/vectors/dss-corpus/`. Active tests today: `crates/eidas-trust/tests/dss_corpus_tsl.rs` (S10), `crates/eidas-timestamp/tests/dss_corpus_tst.rs` (S8). Pending: `crates/{eidas-cades,eidas-pades,eidas-asic,eidas-xades,eidas-jades}/tests/dss_corpus_*.rs` (S3-S7) — the test layout and helper crate `eidas-test-corpus` are in place; only the harnesses + expectations TOML rows remain. |
+| §4 Archive-timestamp imprint | scaffolding | Pending S3-CAdES suite expected to surface `cades-ats-v3-rev-val-{crl,ocsp}.p7s` rows that fail with status `IndeterminateSub` and diagnostic `ATS_IMPRINT_NOT_VERIFIED`. Once `canonical_ats_bytes` lands, those rows must flip to `TotalPassed`. |
+| §5 Full XMLDSig | scaffolding | Pending S5-XAdES suite will mark the broad set of `Signature-X-{AT,BE,...}-*.xml` samples as `XADES_NARROW_PROFILE`-rejected. They become passes when xmlsec1 / pure-Rust c14n implementations land. |
+| §6 TSL XMLDSig | **`#[ignore]` placeholders** | `crates/eidas-trust/tests/dss_corpus_tsl.rs::broken_lotl_signature_is_rejected` and `unsigned_lotl_is_rejected_by_verify_api`. Both panic deliberately until the new `verify_trusted_list_signature` API exists. |
+| §7 JAdES B-T/LT/LTA | scaffolding | Pending S6-JAdES suite will tag `jades-lta.json`, `jades-t-*.json`, `jades-lta-broken-arcTst.json`, etc. with diagnostic `JADES_SIG_TST_NOT_VERIFIED` and `Status::IndeterminateSub`. Lift implementation flips them to `BT`/`BLT`/`BLTA`. |
+| §8 `missing_docs` | n/a | Mechanical lint, no test correlation. |
+| §9 Extra algorithms (RSA-PSS, P-521, EdDSA, SHA-3) | **partial — Wycheproof scaffolding done** | `crates/eidas-cms/tests/wycheproof_primitives.rs` already locks RSA-PKCS1-v1.5 and ECDSA P-256/P-384 against ~5,000 attacker-crafted vectors. RSA-PSS / P-521 / EdDSA modules in that file are commented out with a TODO; uncomment + add the new dispatch arm in `eidas-cms::signature_verify` to extend coverage. |
+
+### Real parser bugs the new corpus tier already exposed (now fixed)
+
+Bringing up S8 against `dss-validation/src/test/resources/` revealed
+two genuine bugs in
+`crates/eidas-timestamp/src/tst.rs::TstInfo::from_der`. Both have
+since been patched and the corresponding tests are no longer
+`#[ignore]`d:
+
+1. **GeneralizedTime tolerance.** `disig.tst` carries
+   `"20190412090032.613Z"` — fractional seconds, which strict DER
+   rejects. The parser now decodes the `GeneralizedTime` body
+   manually, accepting the optional `.fff[fff]` segment and
+   converting via chrono.
+2. **Policy OID buffer.** `tst-two-refs.tst` carries a >50-byte policy
+   OID (~21 arcs), exceeding `const_oid 0.9`'s default 39-byte
+   buffer for `ObjectIdentifier`. The parser now reads the OID body
+   bytes directly and decodes them to a dotted-decimal `String`,
+   sidestepping the buffer cap. `TstInfo.policy` consequently
+   changed type from `ObjectIdentifier` to `String` — a value-only
+   field that no internal verification logic consults.
+

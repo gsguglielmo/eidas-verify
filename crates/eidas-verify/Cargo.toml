@@ -25,8 +25,19 @@ eidas-x509       = { workspace = true }
 x509-cert        = { workspace = true }
 
 [dev-dependencies]
-base64    = { workspace = true }
-der       = { workspace = true }
+base64            = { workspace = true }
+chrono            = { workspace = true }
+der               = { workspace = true }
+eidas-test-corpus = { workspace = true }
+eidas-trust       = { workspace = true }
+insta             = { workspace = true }
+rcgen             = { version = "0.13", default-features = false, features = ["pem", "ring"] }
+rstest            = { workspace = true }
+serde_json        = { workspace = true }
+# Synchronous HTTP client for the optional online tier
+# (EIDAS_VERIFY_ONLINE_TESTS=1). Tiny — a couple hundred KB of object
+# code, no async runtime. dev-only, never linked in published artefacts.
+ureq              = { version = "2", default-features = false, features = ["tls"] }
 
 [features]
 default = ["cades", "pades", "asic", "jades", "trust-list", "ts-119-615", "cades-qualify"]

@@ -1,0 +1,28 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tests · 2 · Conformance (no corpus needed)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <!--
+      Runs conformance suites that need no external corpus:
+        - S1 Wycheproof primitives (eidas-cms / wycheproof_primitives)
+        - S12 ETSI TS 119 312:2023 algorithm policy (eidas-policy / policy_119_312)
+        - All `property_*` parser fuzz suites (proptest, ~3500 random inputs)
+      Cargo test name filter `wycheproof|policy_119_312|property_|no_panic|no_dos`
+      cannot be expressed natively, so we run the union via four `--test`
+      flags (which Cargo accepts repeated).
+    -->
+    <option name="command" value="test --package eidas-cms --test wycheproof_primitives --package eidas-policy --test policy_119_312 --package eidas-pades --test property_pdf_scan --package eidas-trust --test property_tsl --package eidas-jades --test property_jws --package eidas-timestamp --test property_tst" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <envs />
+    <option name="emulateTerminal" value="true" />
+    <option name="channel" value="DEFAULT" />
+    <option name="requiredFeatures" value="true" />
+    <option name="allFeatures" value="false" />
+    <option name="withSudo" value="false" />
+    <option name="buildTarget" value="REMOTE" />
+    <option name="backtrace" value="SHORT" />
+    <option name="isRedirectInput" value="false" />
+    <option name="redirectInputPath" value="" />
+    <method v="2">
+      <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>

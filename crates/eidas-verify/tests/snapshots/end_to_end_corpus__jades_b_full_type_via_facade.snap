@@ -1,0 +1,5 @@
+---
+source: crates/eidas-verify/tests/end_to_end_corpus.rs
+expression: projected_or_err(r)
+---
+err_kind: Json

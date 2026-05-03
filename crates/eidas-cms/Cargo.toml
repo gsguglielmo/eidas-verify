@@ -34,7 +34,12 @@ eidas-policy      = { workspace = true }
 hex               = { workspace = true }
 hex-literal       = { workspace = true }
 pretty_assertions = { workspace = true }
+proptest          = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
+# Wycheproof signature primitive vectors (Apache-2.0). Bundled with the
+# crate, no separate fetch needed.
+wycheproof        = { workspace = true }
 
 [lints]
 workspace = true

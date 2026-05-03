@@ -22,9 +22,13 @@ x509-cert    = { workspace = true }
 
 [dev-dependencies]
 base64            = { workspace = true }
+cms               = { workspace = true }
 eidas-policy      = { workspace = true }
+eidas-test-corpus = { workspace = true }
 hex               = { workspace = true }
 pretty_assertions = { workspace = true }
+proptest          = { workspace = true }
+rstest            = { workspace = true }
 tempfile          = "3"
 
 [lints]

@@ -1,0 +1,36 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tests · 4 · Everything (+ ignored + online)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <!--
+      Exhaustive run:
+        - workspace tests
+        - `--include-ignored` unlocks the placeholders for deferred
+          features (full XMLDSig, TSL XMLDSig, BER-tolerant CMS,
+          RFC 5280 §7 name normalization, etc.) — they are EXPECTED to
+          fail until their respective deferred-work items land
+        - `EIDAS_VERIFY_ONLINE_TESTS=1` activates S15 (live EU LOTL +
+          DSS demo REST oracle)
+
+      This is the same matrix `cargo test` runs in CI's online-tier job
+      (.github/workflows/ci.yml). Expect failures on the deferred
+      `#[ignore]` cases — see docs/09-deferred-work.md "Test
+      cross-reference" for what each one tracks.
+    -->
+    <option name="command" value="test --workspace -- --include-ignored" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <envs>
+      <env name="EIDAS_VERIFY_ONLINE_TESTS" value="1" />
+    </envs>
+    <option name="emulateTerminal" value="true" />
+    <option name="channel" value="DEFAULT" />
+    <option name="requiredFeatures" value="true" />
+    <option name="allFeatures" value="false" />
+    <option name="withSudo" value="false" />
+    <option name="buildTarget" value="REMOTE" />
+    <option name="backtrace" value="SHORT" />
+    <option name="isRedirectInput" value="false" />
+    <option name="redirectInputPath" value="" />
+    <method v="2">
+      <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>
